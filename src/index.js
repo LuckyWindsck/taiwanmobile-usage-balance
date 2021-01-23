@@ -1,8 +1,9 @@
 const puppeteer = require('puppeteer');
 
+// TODO: create .env.example
 require('dotenv').config();
 
-const { PHONE_NUMBER, PASSWORD } = process.env;
+const { PHONE_NUMBER, PASSWORD, INIT_DATA_BALANCE_IN_GB } = process.env;
 
 (async () => {
   const browser = await puppeteer.launch();
@@ -46,7 +47,13 @@ const { PHONE_NUMBER, PASSWORD } = process.env;
     return dataBalance;
   });
 
-  console.log(`上網傳輸量餘額: ${dataBalanceInGB.toFixed(3)} GB`);
+  const roundedDataBalance = dataBalanceInGB.toFixed(3);
+
+  if (INIT_DATA_BALANCE_IN_GB) {
+    console.log(`${roundedDataBalance} / ${INIT_DATA_BALANCE_IN_GB} GB`);
+  } else {
+    console.log(`${roundedDataBalance} GB`);
+  }
 
   await browser.close();
 })();
