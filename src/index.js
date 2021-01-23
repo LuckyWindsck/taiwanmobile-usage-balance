@@ -1,7 +1,8 @@
+const path = require('path');
 const puppeteer = require('puppeteer');
 
 // TODO: create .env.example
-require('dotenv').config();
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') })
 
 const { PHONE_NUMBER, PASSWORD, INIT_DATA_BALANCE_IN_GB } = process.env;
 
