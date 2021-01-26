@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "data-balance": "node src/index.js"
+  },
   "dependencies": {
     "dotenv": "^8.2.0",
     "puppeteer": "^5.5.0"
