@@ -1,4 +1,7 @@
+const child_process = require('child_process');
+const fs = require('fs');
 const path = require('path');
+const readline = require('readline');
 const puppeteer = require('puppeteer');
 
 const projectRoot = (pathSegment) => path.resolve(__dirname, '..', pathSegment);
@@ -18,6 +21,58 @@ const { PHONE_NUMBER, PASSWORD, INIT_DATA_BALANCE_IN_GB } = process.env;
   await page.type('#password', PASSWORD); // Password input box
   await page.$eval('[name="keep90d"]', (element) => { element.checked = false; }); // Remember me check box
   await page.click('a.btn-lg'); // Login button
+
+  const { node, isCaptchaPoped } = await Promise.any([
+    {
+      promise: page.waitForSelector('#captcha-pop.show'), // Captcha
+      isCaptchaPoped: true,
+    },
+    {
+      promise: page.waitForSelector('#app table tbody'), // Login successfully
+      isCaptchaPoped: false,
+    },
+  ].map(({ promise, isCaptchaPoped }) => promise.then((node) => ({ node, isCaptchaPoped }))));
+
+  if (isCaptchaPoped) {
+    const dataUrl = await node.$eval('#captcha-img', (captchaImg) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = captchaImg.naturalWidth;
+      canvas.height = captchaImg.naturalHeight;
+
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(captchaImg, 0, 0);
+
+      return canvas.toDataURL();
+    });
+
+    const base64String = dataUrl.slice(dataUrl.indexOf(',') + 1);
+    const imgBuffer = Buffer.from(base64String, 'base64');
+    const imgPath = projectRoot('captcha-img.png');
+
+    let captchaText;
+
+    try {
+      fs.writeFileSync(imgPath, imgBuffer);
+      child_process.execSync(`open ${imgPath}`);
+
+      captchaText = await new Promise((resolve) => {
+        const rl = readline.createInterface({
+          input: process.stdin,
+          output: process.stdout,
+        });
+
+        rl.question('Please input captcha: ', (text) => {
+          resolve(text);
+          rl.close();
+        });
+      });
+    } finally {
+      child_process.execSync(`rm ${imgPath} 2> /dev/null`);
+    }
+
+    await page.type('#captcha-text', captchaText);
+    await page.click('#captcha-yes');
+  }
 
   const tbody = await page.waitForSelector('#app table tbody'); // Data Balance Table Body
   const dataBalanceInGB = await tbody.$$eval('tr:nth-of-type(n + 2)', (rows) => {
