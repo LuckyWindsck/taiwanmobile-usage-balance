@@ -1,4 +1,4 @@
-const child_process = require('child_process');
+const childProcess = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
@@ -6,7 +6,7 @@ const puppeteer = require('puppeteer');
 
 const projectRoot = (pathSegment) => path.resolve(__dirname, '..', pathSegment);
 
-require('dotenv').config({ path: projectRoot('.env') })
+require('dotenv').config({ path: projectRoot('.env') });
 
 const { PHONE_NUMBER, PASSWORD, INIT_DATA_BALANCE_IN_GB } = process.env;
 
@@ -52,7 +52,7 @@ const { PHONE_NUMBER, PASSWORD, INIT_DATA_BALANCE_IN_GB } = process.env;
 
     try {
       fs.writeFileSync(imgPath, imgBuffer);
-      child_process.execSync(`open ${imgPath}`);
+      childProcess.execSync(`open ${imgPath}`);
 
       captchaText = await new Promise((resolve) => {
         const rl = readline.createInterface({
@@ -66,7 +66,7 @@ const { PHONE_NUMBER, PASSWORD, INIT_DATA_BALANCE_IN_GB } = process.env;
         });
       });
     } finally {
-      child_process.execSync(`rm ${imgPath} 2> /dev/null`);
+      childProcess.execSync(`rm ${imgPath} 2> /dev/null`);
     }
 
     await page.type('#captcha-text', captchaText);
@@ -86,20 +86,20 @@ const { PHONE_NUMBER, PASSWORD, INIT_DATA_BALANCE_IN_GB } = process.env;
       const power = sourceIndex - targetIndex;
 
       return sourceAmount * (1024 ** power);
-    }
+    };
 
     const ths = rows.map((row) => row.querySelector('th'));
     const dataRowIndex = ths.findIndex((th) => th?.innerText === '上網');
     const dataRowSpan = ths[dataRowIndex].rowSpan;
     const dataBalance = rows.slice(dataRowIndex, dataRowIndex + dataRowSpan)
-        .map((row) => (
-          row.querySelector('td:nth-of-type(2)')
-            .innerText
-            .match(/(?<balance>\d*(\.\d*)?)(?<unit>.*$)/)
-            .groups
-        ))
-        .map(({balance, unit}) => convert(balance, unit, 'GB'))
-        .reduce((sum, num) => sum + num, 0);
+      .map((row) => (
+        row.querySelector('td:nth-of-type(2)')
+          .innerText
+          .match(/(?<balance>\d*(\.\d*)?)(?<unit>.*$)/)
+          .groups
+      ))
+      .map(({ balance, unit }) => convert(balance, unit, 'GB'))
+      .reduce((sum, num) => sum + num, 0);
 
     return dataBalance;
   });
