@@ -21,19 +21,13 @@ const { PHONE_NUMBER, PASSWORD, INIT_DATA_BALANCE_IN_GB } = process.env;
   await page.$eval('[name="keep90d"]', (element) => { element.checked = false; }); // Remember me check box
   await page.click('a.btn-lg'); // Login button
 
-  const { node, isCaptchaPoped } = await Promise.any([
-    {
-      promise: page.waitForSelector('#captcha-pop.show'), // Captcha
-      isCaptchaPoped: true,
-    },
-    {
-      promise: page.waitForSelector('#app table tbody'), // Login successfully
-      isCaptchaPoped: false,
-    },
-  ].map(({ promise, isCaptchaPoped }) => promise.then((node) => ({ node, isCaptchaPoped }))));
+  const element = await Promise.any([
+    page.waitForSelector('#captcha-pop.show'), // Captcha
+    page.waitForSelector('#app table tbody'), // Login successfully
+  ]);
 
-  if (isCaptchaPoped) {
-    const dataUrl = await node.$eval('#captcha-img', (captchaImg) => {
+  if (element.id === 'captcha-pop') {
+    const dataUrl = await element.$eval('#captcha-img', (captchaImg) => {
       const canvas = document.createElement('canvas');
       canvas.width = captchaImg.naturalWidth;
       canvas.height = captchaImg.naturalHeight;
