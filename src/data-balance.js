@@ -57,7 +57,7 @@ const getBalanceTable = async (page) => {
 
   let element = await Promise.any([
     page.waitForSelector('#captcha-pop.show'), // Captcha
-    page.waitForSelector('#app table tbody'), // Data Balance Table Body, Login successfully
+    page.waitForSelector('#app table'), // Data Balance Table Body, Login successfully
   ]);
 
   if (element.id === 'captcha-pop') {
