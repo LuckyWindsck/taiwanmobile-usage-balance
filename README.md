@@ -1,5 +1,7 @@
 # taiwanmobile-usage-balance
 
+A simple CLI tool for [Taiwan Mobile (台灣大哥大)](https://www.taiwanmobile.com/index.html) user to check their amount of data used.
+
 ## Screenshot
 I use alias to run this script.
 
